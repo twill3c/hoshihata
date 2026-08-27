@@ -16,6 +16,9 @@ const NAV = [
   { href: "/shop/", label: "直売所" },
   { href: "/restaurant/", label: "食堂" },
   { href: "/panorama/", label: "稜線" },
+  { href: "/rv/", label: "RV パーク" },
+  { href: "/access/", label: "道のり" },
+  { href: "/news/", label: "お知らせ" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -293,6 +293,19 @@ section + section {
   color: var(--accent-ink);
 }
 
+.card__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.8em;
+  vertical-align: 0.1em;
+}
+
 /* ---------------------------------------------------------------- 旬の帯 */
 
 .calendar {
@@ -343,6 +356,106 @@ section + section {
   padding-inline: 0.15rem;
 }
 
+/* ---------------------------------------------------------------- 場内図・方位盤 */
+
+.ground-map {
+  width: 100%;
+  max-width: 44rem;
+  height: auto;
+  display: block;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.gm-deck rect {
+  fill: var(--shade);
+  stroke: var(--line);
+  stroke-width: 0.12;
+}
+
+.gm-deck text {
+  fill: var(--muted);
+  font-size: 1.1px;
+  text-anchor: middle;
+}
+
+.gm-site rect {
+  fill: var(--shade);
+  stroke: var(--leader);
+  stroke-width: 0.12;
+}
+
+.gm-site--power rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.gm-site text {
+  fill: var(--muted);
+  font-size: 1.3px;
+  text-anchor: middle;
+}
+
+.gm-site--power text {
+  fill: var(--accent-ink);
+}
+
+.plan-view {
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.pv-rings circle {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 0.6;
+}
+
+.pv-rings text {
+  fill: var(--muted);
+  font-size: 5px;
+}
+
+.pv-axes line {
+  stroke: var(--line);
+  stroke-width: 0.5;
+  stroke-dasharray: 3 3;
+}
+
+.pv-compass {
+  fill: var(--muted);
+  font-size: 7px;
+}
+
+.pv-origin {
+  fill: var(--ink);
+}
+
+.pv-peak circle {
+  fill: var(--leader);
+}
+
+.pv-peak--visible circle {
+  fill: var(--accent);
+}
+
+.pv-number {
+  fill: var(--accent-ink);
+  font-size: 4.4px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 /* ---------------------------------------------------------------- 表 */
 
 .table-scroll {
@@ -366,6 +479,31 @@ td {
 th {
   color: var(--muted);
   font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- お知らせ */
+
+.news__body {
+  max-width: 44rem;
+}
+
+.news__p {
+  margin: 0 0 1.1rem;
+}
+
+.news__h2 {
+  margin: 2rem 0 0.8rem;
+  font-size: 1.1rem;
+}
+
+.news__ul {
+  margin: 0 0 1.1rem;
+  padding-left: 1.2rem;
+}
+
+.news__body a {
+  color: var(--accent);
+  text-underline-offset: 3px;
 }
 
 /* ---------------------------------------------------------------- 注意書き */

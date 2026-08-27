@@ -60,6 +60,10 @@ const PAGES = [
   { name: "shop", path: "/shop/" },
   { name: "restaurant", path: "/restaurant/" },
   { name: "panorama", path: "/panorama/" },
+  { name: "rv", path: "/rv/" },
+  { name: "access", path: "/access/" },
+  { name: "news", path: "/news/" },
+  { name: "news-entry", path: "/news/season-end/" },
 ];
 
 mkdirSync(join(ROOT, "harness", "shots"), { recursive: true });

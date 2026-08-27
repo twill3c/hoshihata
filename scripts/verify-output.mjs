@@ -40,7 +40,15 @@ const pages = htmlFiles(OUT).map((path) => ({
 }));
 
 // ---- 走査対象の検算。これが無いと、対象を取り違えた検査が静かに合格する
-const EXPECTED_PAGES = ["index.html", "shop/index.html", "restaurant/index.html", "panorama/index.html"];
+const EXPECTED_PAGES = [
+  "index.html",
+  "shop/index.html",
+  "restaurant/index.html",
+  "panorama/index.html",
+  "rv/index.html",
+  "access/index.html",
+  "news/index.html",
+];
 if (pages.length < EXPECTED_PAGES.length) {
   fail("走査対象", `HTML が ${pages.length} 件しか無い(期待 ${EXPECTED_PAGES.length} 件以上)`);
 }
@@ -58,7 +66,13 @@ for (const page of pages) {
 }
 
 // 明示は 4 箇所(F-03)。フッタ + トップ + 食堂 + 稜線
-const NOTICE_PAGES = ["index.html", "restaurant/index.html", "panorama/index.html"];
+const NOTICE_PAGES = [
+  "index.html",
+  "restaurant/index.html",
+  "panorama/index.html",
+  "rv/index.html",
+  "access/index.html",
+];
 for (const path of NOTICE_PAGES) {
   const page = pages.find((p) => p.path === path);
   if (!page) continue;
@@ -114,6 +128,60 @@ if (shop) {
   const bands = [...shop.html.matchAll(/class="calendar__span"/g)].length;
   if (cards.length === 0) fail("shop/index.html", "品が一つも出荷されていない");
   if (bands === 0) fail("shop/index.html", "旬の帯が一本も出荷されていない");
+}
+
+// ---- F-07 場内図。区画の集合が図とデータで一致するか(二重定義の照合)
+const rv = pages.find((p) => p.path === "rv/index.html");
+if (rv) {
+  const drawn = [...rv.html.matchAll(/data-site-id="([^"]+)"/g)].map((m) => m[1]).sort();
+  if (drawn.length === 0) fail("rv/index.html", "場内図に区画が一つも出荷されていない");
+  // 表側(電源の表)にも同じ製品が出ているか
+  const appliances = [...rv.html.matchAll(/data-appliance="([^"]+)"/g)].length;
+  if (appliances === 0) fail("rv/index.html", "電源の表が出荷されていない");
+  if (!/<title id="ground-map-title">/.test(rv.html)) {
+    fail("rv/index.html", "場内図の <title> が出荷されていない(読み上げに要る)");
+  }
+}
+
+// ---- F-08 方位盤
+const access = pages.find((p) => p.path === "access/index.html");
+if (access) {
+  const plotted = [...access.html.matchAll(/data-plan-peak="/g)].length;
+  if (plotted === 0) fail("access/index.html", "方位盤に峰が一つも出荷されていない");
+  if (!/<title id="plan-title">/.test(access.html)) {
+    fail("access/index.html", "方位盤の <title> が出荷されていない");
+  }
+}
+
+// ---- F-09 お知らせ。一覧の項目ぶんの記事が出荷されているか
+const newsIndex = pages.find((p) => p.path === "news/index.html");
+if (newsIndex) {
+  const listed = [...newsIndex.html.matchAll(/data-news="([^"]+)"/g)].map((m) => m[1]);
+  if (listed.length === 0) fail("news/index.html", "お知らせが一件も出荷されていない");
+  for (const slug of listed) {
+    if (!pages.some((p) => p.path === `news/${slug}/index.html`)) {
+      fail("news/index.html", `一覧にある ${slug} の記事が出荷されていない`);
+    }
+  }
+  // 逆向き。一覧に無い記事が出荷されていないこと
+  for (const page of pages) {
+    const hit = /^news\/([^/]+)\/index\.html$/.exec(page.path);
+    if (hit && !listed.includes(hit[1])) {
+      fail(page.path, `一覧に無い記事が出荷されている(${hit[1]})`);
+    }
+  }
+}
+
+// ---- 空の <title> を出荷しない
+//
+// SVG の <title> に複数の式を並べると、React の単一テキスト子要素制約で中身が丸ごと落ち、
+// <title></title> だけが出荷される(HC-037。フリートで 2 回起きている)。
+// 個別の要素を列挙するより、**空であること自体を禁じる**ほうが射程が広い。
+for (const page of pages) {
+  const empty = [...page.html.matchAll(/<title[^>]*>\s*<\/title>/g)].length;
+  if (empty > 0) {
+    fail(page.path, `中身の空の <title> が ${empty} 個出荷されている(React に落とされた疑い)`);
+  }
 }
 
 // ---- 文字種。キリル文字・ハングルの混入
