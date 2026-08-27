@@ -1,0 +1,418 @@
+/*
+ * 配色は明暗の両方で組む(F-10)。
+ *
+ * アウトドアの客は夜の車中泊やテントの中でも見る。暗色は付け足しでなく前提である。
+ * 色は必ず :root に既定を持たせ、暗色ではトークンの値だけを差し替える。
+ * 色をメディアクエリの中だけで定義しない — 定義漏れが「暗い図を暗い背景に置く」事故になる。
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --sky: #eef2f4;
+  --paper: #ffffff;
+  --ink: #1f2b33;
+  --muted: #5f6f79;
+  --line: #d5dee3;
+  --ridge: #46555e;
+  --leader: #93a2ab;
+  --accent: #4a7c59;
+  --accent-ink: #ffffff;
+  --shade: #f3f6f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sky: #0e1519;
+    --paper: #141c21;
+    --ink: #dde6ea;
+    --muted: #94a4ae;
+    --line: #27343b;
+    --ridge: #6d818b;
+    --leader: #4f5e67;
+    --accent: #7fae8c;
+    --accent-ink: #0e1519;
+    --shade: #1a242a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--sky);
+}
+
+body {
+  margin: 0;
+  padding: 0 0 5.5rem;
+  background: var(--sky);
+  color: var(--ink);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.wrap {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ---------------------------------------------------------------- 見出し */
+
+.masthead {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.masthead .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.75rem;
+  align-items: baseline;
+  padding-block: 1.1rem;
+}
+
+.masthead__name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+}
+
+.masthead__reading {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+}
+
+.masthead nav {
+  display: flex;
+  gap: 1.25rem;
+  margin-left: auto;
+  font-size: 0.92rem;
+}
+
+.masthead nav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding-block: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+
+.masthead nav a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- 稜線の図 */
+
+.panorama {
+  margin: 0;
+  background: var(--paper);
+  border-block: 1px solid var(--line);
+}
+
+.panorama__inner {
+  max-width: 78rem;
+  margin: 0 auto;
+}
+
+.hh-panorama {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hh-ridge {
+  fill: var(--ridge);
+}
+
+.hh-tick line {
+  stroke: var(--leader);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.hh-tick text {
+  fill: var(--muted);
+  font-size: 13px;
+}
+
+.hh-leader {
+  fill: none;
+  stroke: var(--leader);
+  stroke-width: 1;
+}
+
+.hh-summit {
+  fill: var(--ink);
+}
+
+.hh-name {
+  fill: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.hh-elev {
+  fill: var(--muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.panorama figcaption {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem 1.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- 本文 */
+
+.lede {
+  font-size: 1.05rem;
+  max-width: 44rem;
+}
+
+section {
+  padding-block: 2.5rem;
+}
+
+section + section {
+  border-top: 1px solid var(--line);
+}
+
+.section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.section__head h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.section__note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- 絞り込み */
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.filter__button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.28rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.filter__button:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.filter__button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------------------------------------------------------------- 一覧 */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1rem 1.1rem;
+}
+
+.card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.card__season {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: var(--shade);
+  color: var(--muted);
+}
+
+.card--seasonal .card__season {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------------------------------------------------------------- 旬の帯 */
+
+.calendar {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.calendar__name {
+  font-size: 0.88rem;
+}
+
+.calendar__track {
+  position: relative;
+  height: 1.1rem;
+  background: var(--shade);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.calendar__span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--accent);
+}
+
+/* 月の目盛。12 等分でなく通日に比例した位置に置く(帯と同じ尺度) */
+.calendar__months {
+  position: relative;
+  height: 1.1rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.calendar__month {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding-inline: 0.15rem;
+}
+
+/* ---------------------------------------------------------------- 表 */
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- 注意書き */
+
+.fiction {
+  background: var(--shade);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* fleet: fixed footer */
+.site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
+  color: var(--muted);
+  z-index: 20;
+}
+
+.site-footer__inner {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0.55rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  align-items: center;
+}
+
+.site-footer a {
+  color: var(--muted);
+}
+
+@media (max-width: 40rem) {
+  body {
+    padding-bottom: 7rem;
+  }
+
+  .calendar__row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
