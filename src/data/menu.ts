@@ -57,6 +57,12 @@ export const MENU_ITEMS: readonly MenuItem[] = [
     ingredientIds: ["cabbage-summer", "roast-ham", "fresh-cheese"],
   },
   {
+    id: "salad-spinach-egg",
+    name: "ホウレンソウと生ハムのサラダ",
+    summary: "生でも食べられる若い葉のうちに。塩気は生ハムから",
+    ingredientIds: ["spinach", "raw-ham", "fresh-cheese"],
+  },
+  {
     id: "plate-ham-bread",
     name: "ハムとパンの皿",
     summary: "野菜の無い季節はこれになる",

@@ -67,9 +67,11 @@ describe("T-37 旬の帯の区間", () => {
     expect(season).not.toBeNull();
     expect(season!.dayCount).toBeGreaterThan(0);
     expect(season!.dayCount).toBeLessThan(DAYS_IN_YEAR);
-    // 出所: SPEC §5.4 の実測(6/11〜10/12)。旬粒度で緩めて縛る
-    expect(season!.fromDoy).toBeGreaterThanOrEqual(dayOfYearOf(6, 1));
-    expect(season!.toDoy).toBeLessThanOrEqual(dayOfYearOf(10, 31));
+    // 出所: 実測 2026-08-27(L7 時点)。5/16〜10/25、163 日。
+    // ホウレンソウを足して作期が早まった(5 ℃ から育つのでレタスより 1 か月近く早い)。
+    // 旬粒度で緩めて縛る
+    expect(season!.fromDoy).toBeGreaterThanOrEqual(dayOfYearOf(5, 6));
+    expect(season!.toDoy).toBeLessThanOrEqual(dayOfYearOf(11, 4));
   });
 });
 

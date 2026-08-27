@@ -1,4 +1,4 @@
-// キャベツ(SPEC §5.6、T-54〜T-56)。
+// キャベツとホウレンソウ(SPEC §5.5–5.9、T-54〜T-58)。
 //
 // レタスと同じ構造で縛る —— パラメータは原典の**本文**、検証は原典の**栽培暦**。
 //
@@ -7,7 +7,15 @@
 // (loop_006 の実測)。だからパラメータを実測で選ばず、原典の記述だけから決めている。
 
 import { describe, expect, it } from "vitest";
-import { CULTIVARS, PLANTING_WINDOWS, cultivarById, plantingWindowFor } from "@/data/crops";
+import {
+  CROP_LABEL,
+  CULTIVARS,
+  PLANTING_WINDOWS,
+  START_EVENT_LABEL,
+  cropNames,
+  cultivarById,
+  plantingWindowFor,
+} from "@/data/crops";
 import {
   dayOfYearOf,
   DAYS_IN_YEAR,
@@ -178,6 +186,89 @@ describe("T-56 オラクルの判別力を測って記録する", () => {
     const lo = dayOfYearOf(6, 1) - SPAN_TOLERANCE_DAYS;
     expect(at(10)).toBeGreaterThanOrEqual(lo); // 原典どおりの閾値は通る
     expect(at(5)).toBeLessThan(lo); // 取り違えた閾値は落ちる
+  });
+});
+
+describe("T-58 オラクル — ホウレンソウの収穫期", () => {
+  // 出所: 外部権威。BSI ホウレンソウ p.2（寒冷地・冷涼地）
+  //   「雪解け後の 4 月中旬から 9 月中旬まで播種して、5 月下旬から 10 月中旬までに収穫」
+  // パラメータ（播種 35 日・5/25 ℃）を取った p.9 / p.1 とは別の記述である
+  const spinach = cultivarById("spinach")!;
+
+  it("**播種**から数える作型である（定植ではない）", () => {
+    // 原典の日数がどちらから数えたものかを取り違えると、作期が丸ごとずれる。
+    // ホウレンソウは直根性で移植を嫌うので直播きする（原典 p.2）
+    expect(spinach.startEvent).toBe("sowing");
+    for (const cultivar of CULTIVARS.filter((c) => c.crop !== "spinach")) {
+      expect(`${cultivar.id}: ${cultivar.startEvent}`).toBe(`${cultivar.id}: transplanting`);
+    }
+  });
+
+  it("播種期間の起点・終点が原典の旬と一致する", () => {
+    expect(PLANTING_WINDOWS.spinachCold.fromDoy).toBe(dayOfYearOf(4, 11)); // 4 月中旬の初日
+    expect(PLANTING_WINDOWS.spinachCold.toDoy).toBe(dayOfYearOf(9, 20)); // 9 月中旬の末日
+  });
+
+  it("収穫日が 5 月下旬〜10 月中旬に収まる", () => {
+    const window = plantingWindowFor(spinach);
+    let checked = 0;
+    for (let doy = window.fromDoy; doy <= window.toDoy; doy++) {
+      const harvest = harvestDayOfCultivar(doy, spinach);
+      expect(harvest).not.toBeNull();
+      expectWithinOracle(harvest!, [5, 21], [10, 20]);
+      checked++;
+    }
+    // 播種期間の全日で成立する（レタスやキャベツと違い、間に合わない日が無い）
+    expect(checked).toBe(window.toDoy - window.fromDoy + 1);
+  });
+
+  it("温度の閾値が 5–25 ℃ で、他の作物と違う", () => {
+    expect(`${spinach.growthLowC}–${spinach.growthHighC}`).toBe("5–25");
+    // 上限がいちばん低く、下限もいちばん低い
+    for (const other of CULTIVARS.filter((c) => c.crop !== "spinach")) {
+      expect(`${other.id}: ${other.growthLowC > spinach.growthLowC}`).toBe(`${other.id}: true`);
+      expect(`${other.id}: ${other.growthHighC > spinach.growthHighC}`).toBe(`${other.id}: true`);
+    }
+  });
+
+  it("いちばん早く棚に出る（5 ℃ から育つため）", () => {
+    // 作物を足した意味がデータに出ていること
+    const firstOf = (crop: string) => {
+      for (let doy = 1; doy <= DAYS_IN_YEAR; doy++) {
+        if (produceOn(doy).some((p) => p.crop === crop)) return doy;
+      }
+      return DAYS_IN_YEAR + 1;
+    };
+    expect(firstOf("spinach")).toBeLessThan(firstOf("lettuce"));
+    expect(firstOf("spinach")).toBeLessThan(firstOf("cabbage"));
+  });
+});
+
+describe("T-59 作物の呼び名が型で縛られている", () => {
+  it("すべての作物に日本語の呼び名がある", () => {
+    // Record<Crop, string> なので、Crop を足したらここを埋めるまでコンパイルが通らない。
+    // 以前はページ側に Record<string, string> とフォールバックを置いていて、
+    // 埋め忘れが「レタスとキャベツと spinach の栽培生理」として出荷された(loop_007)
+    for (const crop of new Set(CULTIVARS.map((c) => c.crop))) {
+      const label = CROP_LABEL[crop];
+      expect(`${crop}: ${label}`).not.toBe(`${crop}: undefined`);
+      // 呼び名に英字が混ざっていない
+      expect(`${crop}: ${/[A-Za-z]/.test(label)}`).toBe(`${crop}: false`);
+    }
+  });
+
+  it("作物名の一覧が、出荷している作物と過不足なく一致する", () => {
+    const names = cropNames();
+    const crops = [...new Set(CULTIVARS.map((c) => c.crop))];
+    expect(names).toHaveLength(crops.length);
+    expect(names).toEqual(crops.map((c) => CROP_LABEL[c]));
+  });
+
+  it("作期の起点にも日本語の呼び名がある", () => {
+    for (const cultivar of CULTIVARS) {
+      const label = START_EVENT_LABEL[cultivar.startEvent];
+      expect(`${cultivar.id}: ${/[A-Za-z]/.test(label)}`).toBe(`${cultivar.id}: false`);
+    }
   });
 });
 

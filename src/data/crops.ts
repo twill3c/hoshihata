@@ -11,7 +11,40 @@
 // **温度の閾値は作物ごとに違う。** 原典は作物ごとに違う言い方をしていて、
 // どの記述が「収穫に到達する律速」かも違う。一律の閾値を置いてはならない。
 
-export type Crop = "lettuce" | "cabbage";
+export type Crop = "lettuce" | "cabbage" | "spinach";
+
+/**
+ * 作期の起点になる作業。
+ * レタスとキャベツは苗を育ててから植える（定植）。ホウレンソウは直根性で移植を嫌うので
+ * 畑に直播きする（播種）。**原典の日数がどちらから数えたものかが違う**ので、
+ * 型で区別して取り違えを防ぐ。
+ */
+export type StartEvent = "transplanting" | "sowing";
+
+export const START_EVENT_LABEL: Record<StartEvent, string> = {
+  transplanting: "定植",
+  sowing: "播種",
+};
+
+/**
+ * 作物の呼び名。**`Record<Crop, string>` なので、`Crop` を足したら
+ * ここを埋めるまでコンパイルが通らない。**
+ *
+ * 以前はページ側に `Record<string, string>` で置き、フォールバックを付けていた。
+ * ホウレンソウを足したときに埋め忘れ、「レタスとキャベツと spinach の栽培生理」と
+ * 英語キーがそのまま本文に出た。型が緩く、フォールバックがあるので、
+ * テストも build も緑のままだった（loop_007・目視で発見）。
+ */
+export const CROP_LABEL: Record<Crop, string> = {
+  lettuce: "レタス",
+  cabbage: "キャベツ",
+  spinach: "ホウレンソウ",
+};
+
+/** 出荷している作物の呼び名を、データから並べる。文に書き写さない。 */
+export function cropNames(): string[] {
+  return [...new Set(CULTIVARS.map((c) => c.crop))].map((crop) => CROP_LABEL[crop]);
+}
 
 export type Cultivar = {
   id: string;
@@ -20,7 +53,9 @@ export type Cultivar = {
   crop: Crop;
   /** 結球するか（リーフレタスは false） */
   heading: boolean;
-  /** 定植から収穫までの所要日数。原典本文の記述による */
+  /** 作期の起点（定植か播種か）。原典の日数がどちらから数えたものかを表す */
+  startEvent: StartEvent;
+  /** 起点から収穫までの所要日数。原典本文の記述による */
   daysToHarvest: number;
   /** その日数の出所 */
   source: string;
@@ -54,6 +89,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "早生の結球レタス",
     crop: "lettuce",
     heading: true,
+    startEvent: "transplanting",
     daysToHarvest: 40,
     source: "BSI レタス p.2「品種により定植してから早生種では 40 日…に収穫する」",
     windowId: "headingLettuceCold",
@@ -67,6 +103,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "中生の結球レタス",
     crop: "lettuce",
     heading: true,
+    startEvent: "transplanting",
     daysToHarvest: 50,
     source: "BSI レタス p.2「中生種では 50 日…に収穫する」",
     windowId: "headingLettuceCold",
@@ -80,6 +117,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "晩生の結球レタス",
     crop: "lettuce",
     heading: true,
+    startEvent: "transplanting",
     daysToHarvest: 60,
     source: "BSI レタス p.2「晩生種では 60 日前後に収穫する」",
     windowId: "headingLettuceCold",
@@ -93,6 +131,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "リーフレタス",
     crop: "lettuce",
     heading: false,
+    startEvent: "transplanting",
     // 原典は 30〜40 日と幅で書く。代表値として中央の 35 日を採る。
     // 幅そのものを扱いたくなったら、まず SPEC の保証粒度を上げること（HC-016）。
     daysToHarvest: 35,
@@ -118,6 +157,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "春まきのキャベツ",
     crop: "cabbage",
     heading: true,
+    startEvent: "transplanting",
     // 原典は 60〜70 日と幅で書く。代表値として中央の 65 日を採る
     daysToHarvest: 65,
     source: "BSI キャベツ p.12「春キャベツと夏秋キャベツが定植 60〜70 日後…収穫時期である」の中央値",
@@ -134,6 +174,7 @@ export const CULTIVARS: readonly Cultivar[] = [
     name: "夏まきのキャベツ",
     crop: "cabbage",
     heading: true,
+    startEvent: "transplanting",
     daysToHarvest: 65,
     source:
       "BSI キャベツ p.12「春キャベツと夏秋キャベツが定植 60〜70 日後…収穫時期である」の中央値",
@@ -144,6 +185,38 @@ export const CULTIVARS: readonly Cultivar[] = [
       "BSI キャベツ p.12「気温低い(8 ℃以下)と高い(28 ℃以上)環境に於いても結球しない」" +
       "（定植→収穫は結球を含むので、収穫に到達する律速はこちら）",
     survivalLowC: 5,
+  },
+
+  // ------------------------------------------------------------ ホウレンソウ
+  //
+  // **直根性で移植を嫌うので直播きする。** 原典の日数は定植でなく播種から数えたもの。
+  //   p.9「露地栽培では気温の高い晩春播きと早秋播きは播種 35 日後、
+  //        気温の低い早春播きと晩秋播きは播種 40 日後…収穫する」
+  //
+  // 35 と 40 の差は季節の気温差によるもので、**本モデルは生育可能日だけを数えるため
+  // その差を既に織り込んでいる**。よって生育可能日 ≒ 暦日となる暖かい季節の値 35 を採る。
+  // （モデルは 6 ℃ の日と 18 ℃ の日を同じ 1 日として数える粗さを持つ。この限界は SPEC §5.9 に書いた）
+  //
+  // 温度は原典が二度書いている:
+  //   p.1「5 ℃以下では生育が止まるが…25 ℃を超えると、生育が抑制される」
+  //   p.3「露地栽培では 5 ℃未満の低温と 25 ℃以上の高温を回避すれば…」
+  {
+    id: "spinach",
+    name: "ホウレンソウ",
+    crop: "spinach",
+    heading: false,
+    startEvent: "sowing",
+    daysToHarvest: 35,
+    source:
+      "BSI ホウレンソウ p.9「気温の高い晩春播きと早秋播きは播種 35 日後…収穫する」" +
+      "（35 と 40 の差は気温差によるもので、生育可能日を数える本モデルでは 35 が対応する）",
+    windowId: "spinachCold",
+    growthLowC: 5,
+    growthHighC: 25,
+    thresholdSource:
+      "BSI ホウレンソウ p.1「5 ℃以下では生育が止まるが…25 ℃を超えると、生育が抑制される」" +
+      "／同 p.3「露地栽培では 5 ℃未満の低温と 25 ℃以上の高温を回避すれば」",
+    survivalLowC: -10,
   },
 ];
 
@@ -156,7 +229,8 @@ export type PlantingWindowId =
   | "headingLettuceCold"
   | "leafLettuceCold"
   | "springCabbageCold"
-  | "summerCabbageCold";
+  | "summerCabbageCold"
+  | "spinachCold";
 
 export type PlantingWindow = {
   /** 定植期間の開始（通日 1-366） */
@@ -198,6 +272,15 @@ export const PLANTING_WINDOWS = {
     fromDoy: 183, // 7/1
     toDoy: 223, // 8/10
     source: "BSI キャベツ 図 2 寒冷地・冷涼地 夏秋キャベツの定植",
+  },
+  /**
+   * ホウレンソウ: **播種** 4 月中旬〜9 月中旬（本文 p.2）。
+   * 「雪解け後の 4 月中旬から 9 月中旬まで播種して、5 月下旬から 10 月中旬までに収穫」
+   */
+  spinachCold: {
+    fromDoy: 102, // 4/11
+    toDoy: 264, // 9/20
+    source: "BSI ホウレンソウ p.2「雪解け後の 4 月中旬から 9 月中旬まで播種して」（寒冷地・冷涼地）",
   },
 } as const satisfies Record<PlantingWindowId, PlantingWindow>;
 

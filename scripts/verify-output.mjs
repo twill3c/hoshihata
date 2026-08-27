@@ -314,6 +314,38 @@ for (const [name, checks] of [
   }
 }
 
+// ---- 内部の識別子が本文に漏れていないか
+//
+// 対応表の埋め忘れとフォールバック（`?? key`）が組み合わさると、英語の識別子が
+// そのまま本文に出る。「レタスとキャベツと spinach の栽培生理」が実際に出荷された
+// （loop_007・目視でしか見つからなかった）。型で塞いだうえで、出力側でも見る。
+const INTERNAL_KEYS = [
+  "lettuce",
+  "cabbage",
+  "spinach",
+  "transplanting",
+  "sowing",
+  "vegetable",
+  "dairy",
+  "bakery",
+  "gear",
+  "undefined",
+  "NaN",
+  "[object Object]",
+];
+for (const page of pages) {
+  // 属性値（data-* や class）に出るのは正常。**文字として読者に見える位置**だけを見る
+  const visible = page.html
+    .replace(/<script[\s\S]*?<\/script>/g, "")
+    .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<[^>]+>/g, "");
+  for (const key of INTERNAL_KEYS) {
+    if (visible.includes(key)) {
+      fail(page.path, `内部の識別子が本文に出ている: ${key}`);
+    }
+  }
+}
+
 // ---- 空の <title> を出荷しない
 //
 // SVG の <title> に複数の式を並べると、React の単一テキスト子要素制約で中身が丸ごと落ち、

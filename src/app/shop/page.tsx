@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SeasonCalendar } from "@/components/SeasonCalendar";
 import { ShopList, type ShopListItem } from "@/components/ShopList";
-import { CULTIVARS } from "@/data/crops";
+import { CROP_LABEL, CULTIVARS, cropNames } from "@/data/crops";
 import { SHOP_CATEGORIES, SHOP_ITEMS, categoryName } from "@/data/shop";
 import { monthDayOf } from "@/lib/harvest";
 import { seasonSpansOf, vegetableSeason } from "@/lib/shelf";
@@ -26,13 +26,17 @@ function seasonLabelOf(itemId: string, seasonal: boolean): string {
     .join("、");
 }
 
-/** 扱っている作物の名。文を作物一覧から導くので、作物を足しても文が古くならない。 */
-const CROP_LABELS: Record<string, string> = { lettuce: "レタス", cabbage: "キャベツ" };
-
 export default function ShopPage() {
-  const cropNames = [...new Set(CULTIVARS.map((c) => c.crop))]
-    .map((crop) => CROP_LABELS[crop] ?? crop)
-    .join("と");
+  // 作物の呼び名はデータ側が持つ（src/data/crops.ts）。
+  // ページ側にフォールバック付きの対応表を置くと、埋め忘れが英語キーのまま本文に出る
+  const crops = cropNames().join("と");
+
+  // 閾値の一覧も作型データから作る。文に書き写すと作物を足したときに古くなる
+  const thresholdSentence = [
+    ...new Map(
+      CULTIVARS.map((c) => [c.crop, `${CROP_LABEL[c.crop]}は ${c.growthLowC}〜${c.growthHighC} ℃`]),
+    ).values(),
+  ].join("、") + " で日数を数えています。";
 
   const items: ShopListItem[] = SHOP_ITEMS.map((item) => ({
     id: item.id,
@@ -52,10 +56,10 @@ export default function ShopPage() {
         <h1>直売所</h1>
         <p className="lede">
           高原野菜の棚は季節でまるごと入れ替わります。並ぶ日は決め打ちではなく、
-          気象庁アメダス野辺山の日別平年値と{cropNames}の栽培生理から計算した収穫日です。
+          気象庁アメダス野辺山の日別平年値と{crops}の栽培生理から計算した収穫日です。
           {season ? `通年 366 日のうち、野菜が並ぶのは ${season.dayCount} 日。` : null}
           <strong>温度の閾値は作物ごとに違います。</strong>
-          レタスは 10〜30 ℃、キャベツは 8〜28 ℃ で日数を数えています。
+          {thresholdSentence}
         </p>
       </section>
 
@@ -76,6 +80,25 @@ export default function ShopPage() {
           items={items}
           categories={SHOP_CATEGORIES.map((c) => ({ id: c.id, name: c.name }))}
         />
+      </section>
+
+      <section>
+        <div className="section__head">
+          <h2>置いていない野菜</h2>
+          <span className="section__note">同じ計算で「合わない」と出たもの</span>
+        </div>
+        <p>
+          <strong>ブロッコリー</strong>は 10 ℃ を下回ると育ちません。
+          ここで日平均が 10 ℃ を超えるのは 5 月 8 日から 10 月 12 日までの 158 日だけで、
+          定植から収穫まで 70〜90 日かかる作物にはこの窓が足りません。
+          四月に植えても五月八日まで一日も進まないので、
+          <strong>四月のいつ植えても収穫日が同じ</strong>になります。
+        </p>
+        <p>
+          <strong>ダイコン</strong>は、参照している原典に「何度を下回ると育たないか」の記述が
+          ありません。上限（25 ℃ 以上で主根の肥大が抑制される）だけが書かれています。
+          分からないものを推測で埋めないことにしているので、置いていません。
+        </p>
       </section>
 
       <section>
