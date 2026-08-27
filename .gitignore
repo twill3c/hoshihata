@@ -5,3 +5,5 @@ out/
 .vercel/
 out/
 harness/shots/
+
+.vercel

@@ -99,7 +99,7 @@ logs/loops/      ループログ
 npm install
 npm run gen              # 原典 HTML → 平年値 366 日
 npm run gen:terrain      # 標高タイル → 稜線 1401 点 / 峰 13 座
-npm test                 # テスト 133 件
+npm test                 # テスト 148 件
 npm run typecheck
 
 npm run build            # 静的書き出し（out/）
@@ -123,7 +123,15 @@ L1 完了（旬カレンダーのモデルと架空明示ゲート）。
 L2 完了（八ヶ岳の稜線同定図）。
 L3 完了（Next.js の骨格・直売所・食堂・明暗テーマ・出荷 HTML を読む検査）。
 L4 完了（RV パーク・道のり・お知らせ）。
-L5 = OG 画像・JSON-LD・sitemap・Lighthouse・公開。
+L5 ほぼ完了（OG 画像・JSON-LD・sitemap・フリート共通フッタ・GitHub 公開）。
+**残るは Vercel へのデプロイと app-menu への掲載のみ**（日次上限のため 24 時間待ち）。
+
+## 公開
+
+- ソース: <https://github.com/twill3c/hoshihata>
+- 本番: `https://hoshihata.vercel.app`（**未公開** — Vercel の日次デプロイ上限に当たったため。
+  24 時間おいて `npx vercel deploy --prod --yes --scope twill3c-8670s-projects --archive=tgz`）
+- 歩き方 / 設計図: フッタから開けます
 
 ## ライセンス
 

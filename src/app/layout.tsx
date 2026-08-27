@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { STATION } from "@/data/station";
-import { SITE } from "@/data/site";
+import { FOOTER, SITE } from "@/data/site";
 import { websiteJsonLd } from "@/lib/jsonld";
 import "./globals.css";
 
@@ -56,11 +56,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
         />
 
-        {/* fleet: fixed footer。架空である旨の明示はここが 1 箇所目(F-03) */}
+        {/*
+          fleet: fixed footer。フリート共通規約(5 項目・この並び・下部固定)に、
+          架空である旨の明示を先頭に足したもの。明示はここが 1 箇所目(F-03)。
+          ラベルは和名+固有動詞を温存する(統一するのは並びと項目数であって文言ではない)。
+        */}
         <footer className="site-footer">
           <div className="site-footer__inner">
-            <span>{STATION.fictionNotice}</span>
-            <span>MIT License © 2026 坂田哲朗</span>
+            <span className="site-footer__fiction">{STATION.fictionNotice}</span>
+            <a href={FOOTER.license}>MIT License © 2026 坂田哲朗</a>
+            <a href={FOOTER.repository}>GitHub</a>
+            <a href={FOOTER.guide}>星畑の歩き方</a>
+            <a href={FOOTER.blueprint}>星畑の設計図</a>
+            <a href={FOOTER.appMenu}>App Menu</a>
           </div>
         </footer>
       </body>

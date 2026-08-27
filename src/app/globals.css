@@ -536,8 +536,27 @@ th {
   padding: 0.55rem 1.5rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.9rem;
+  gap: 0.2rem 0.85rem;
   align-items: center;
+}
+
+/* 項目のあいだに区切りを入れる(規約の並びが読み取れるように) */
+.site-footer__inner > a + a::before {
+  content: "・";
+  margin-right: 0.85rem;
+  color: var(--line);
+}
+
+.site-footer__fiction {
+  flex-basis: 100%;
+  color: var(--ink);
+}
+
+@media (min-width: 62rem) {
+  .site-footer__fiction {
+    flex-basis: auto;
+    margin-right: 0.4rem;
+  }
 }
 
 .site-footer a {

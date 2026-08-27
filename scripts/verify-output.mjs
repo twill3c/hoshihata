@@ -95,12 +95,54 @@ for (const page of pages) {
   }
 }
 
-// ---- N-03 写真を持たない
+// ---- N-03 写真を持たない / N-04 外部の資産を取りに行かない
+//
+// 禁じたいのは**外部から取得される資産**(画像・CSS・フォント)であって、
+// 利用者がクリックする<a href>ではない。属性名だけで一括りにすると、
+// フリート共通フッタの外部リンクを写真と同一視して落とす(loop_005 で実際に起きた)。
+//
+// そのかわり <a href> を野放しにはしない。外部リンクの集合が
+// フッタ規約の 5 項目に一致することを下で別に縛る。
+const ALLOWED_EXTERNAL_LINKS = [
+  "https://opensource.org/licenses/MIT",
+  "https://github.com/twill3c/hoshihata",
+  "https://claude.ai/code/artifact/603d766b-05bc-47ed-b706-eeb64346c142",
+  "https://claude.ai/code/artifact/38a59c53-4b96-4c8b-9e50-8100fcc3323c",
+  "https://app-menu-amber.vercel.app/",
+];
+
 for (const page of pages) {
   const img = /<img\b[^>]*>/i.exec(page.html);
   if (img) fail(page.path, `<img> が出荷されている(写真は持たない): ${img[0].slice(0, 80)}`);
-  const external = /(?:src|href)="https?:\/\/(?!www\.w3\.org)/i.exec(page.html);
-  if (external) fail(page.path, `外部への参照が出荷されている: ${external[0]}`);
+
+  // 資産の取得元。src= と <link rel=...> の href、CSS の url()
+  const assetPatterns = [
+    { name: "src", pattern: /\bsrc(?:set)?="https?:\/\//i },
+    { name: "<link href>", pattern: /<link\b[^>]*href="https?:\/\//i },
+    { name: "CSS の url()", pattern: /url\(\s*['"]?https?:\/\//i },
+    { name: "@import", pattern: /@import\s+(?:url\()?['"]?https?:\/\//i },
+  ];
+  for (const { name, pattern } of assetPatterns) {
+    const hit = pattern.exec(page.html);
+    if (hit) fail(page.path, `外部の資産を取りに行っている(${name}): ${hit[0]}`);
+  }
+
+  // 外部リンクはフッタ規約の 5 項目だけ
+  for (const link of page.html.matchAll(/<a\b[^>]*href="(https?:\/\/[^"]+)"/gi)) {
+    if (!ALLOWED_EXTERNAL_LINKS.includes(link[1])) {
+      fail(page.path, `規約に無い外部リンクが出荷されている: ${link[1]}`);
+    }
+  }
+}
+
+// フッタ規約の 5 項目が全ページに揃っているか(欠けても気づけるように)
+for (const page of pages) {
+  if (page.path.startsWith("404")) continue;
+  for (const link of ALLOWED_EXTERNAL_LINKS) {
+    if (!page.html.includes(`href="${link}"`)) {
+      fail(page.path, `フッタ規約の項目が欠けている: ${link}`);
+    }
+  }
 }
 
 // ---- N-04 実行時に外部へ問い合わせない
