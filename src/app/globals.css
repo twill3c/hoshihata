@@ -547,16 +547,16 @@ th {
   color: var(--line);
 }
 
+/*
+  架空である旨。senoto-mori に倣い、5 項目の**下**に一行として置く。
+  画面幅によらず自分の行を占め、リンクより控えめな濃さにする
+  (規約の並びを読むのが先で、断りはその補足という順序)。
+*/
 .site-footer__fiction {
-  flex-basis: 100%;
-  color: var(--ink);
-}
-
-@media (min-width: 62rem) {
-  .site-footer__fiction {
-    flex-basis: auto;
-    margin-right: 0.4rem;
-  }
+  width: 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .site-footer a {

@@ -62,13 +62,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ラベルは和名+固有動詞を温存する(統一するのは並びと項目数であって文言ではない)。
         */}
         <footer className="site-footer">
+          {/*
+            ブランドサイト三作(senoto-mori / hoshihata / sugi-nami)は
+            senoto-mori の書きっぷりに揃える —— 規約の 5 項目を先に置き、
+            架空である旨をその下の一行として続ける。
+          */}
           <div className="site-footer__inner">
-            <span className="site-footer__fiction">{STATION.fictionNotice}</span>
-            <a href={FOOTER.license}>MIT License © 2026 坂田哲朗</a>
+            <a href={FOOTER.license}>MIT License</a>
             <a href={FOOTER.repository}>GitHub</a>
             <a href={FOOTER.guide}>星畑の歩き方</a>
             <a href={FOOTER.blueprint}>星畑の設計図</a>
             <a href={FOOTER.appMenu}>App Menu</a>
+            <p className="site-footer__fiction">{STATION.fictionNotice}</p>
           </div>
         </footer>
       </body>
