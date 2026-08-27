@@ -66,6 +66,7 @@ export const PANORAMA = {
   azimuthStepDeg: 0.05,
   rayStepM: 15,
   rayMaxM: 26000,
+  peakRadiusM: 40000,
   summitBufferM: 150,
   refractionK: 0.13,
   earthRadiusM: 6371008.8,
@@ -1476,15 +1477,18 @@ export const SKYLINE: readonly SkylinePoint[] = [
 ];
 
 export const PEAKS: readonly Peak[] = [
+  { name: "入笠山", reading: "にゅうかさやま", surveyElevationM: 1955, surveyKind: "三角点", latitudeDeg: 35.896323, longitudeDeg: 138.171603, distanceM: 27632, azimuthDeg: 258.007, apparentAngleDeg: 1.1403, demElevationM: 1946.1, demAngleDeg: null, maxAngleInFrontDeg: null, visibility: "unknown" },
   { name: "権現岳＜三ッ頭＞", reading: "ごんげんだけ＜みつがしら＞", surveyElevationM: 2580, surveyKind: "標高点", latitudeDeg: 35.942263, longitudeDeg: 138.363961, distanceM: 9719, azimuthDeg: 266.049, apparentAngleDeg: 7.1586, demElevationM: 2568.6, demAngleDeg: 7.0923, maxAngleInFrontDeg: 6.5703, visibility: "visible" },
   { name: "編笠山", reading: "あみがさやま", surveyElevationM: 2524, surveyKind: "三角点", latitudeDeg: 35.941696, longitudeDeg: 138.345057, distanceM: 11421, azimuthDeg: 266.332, apparentAngleDeg: 5.8104, demElevationM: 2515.8, demAngleDeg: 5.7699, maxAngleInFrontDeg: 7.1059, visibility: "hidden" },
   { name: "権現岳＜西岳＞", reading: "ごんげんだけ＜にしだけ＞", surveyElevationM: 2398, surveyKind: "標高点", latitudeDeg: 35.950099, longitudeDeg: 138.335031, distanceM: 12301, azimuthDeg: 270.955, apparentAngleDeg: 4.8086, demElevationM: 2387.6, demAngleDeg: 4.7608, maxAngleInFrontDeg: 7.4889, visibility: "hidden" },
   { name: "権現岳", reading: "ごんげんだけ", surveyElevationM: 2715, surveyKind: "標高点", latitudeDeg: 35.949802, longitudeDeg: 138.359742, distanceM: 10076, azimuthDeg: 270.961, apparentAngleDeg: 7.66, demElevationM: 2677.6, demAngleDeg: 7.4508, maxAngleInFrontDeg: 6.6417, visibility: "visible" },
+  { name: "守屋山", reading: "もりやさん", surveyElevationM: 1651, surveyKind: "三角点", latitudeDeg: 35.967516, longitudeDeg: 138.093406, distanceM: 34113, azimuthDeg: 273.696, apparentAngleDeg: 0.3673, demElevationM: null, demAngleDeg: null, maxAngleInFrontDeg: null, visibility: "unknown" },
   { name: "阿弥陀岳", reading: "あみだだけ", surveyElevationM: 2805, surveyKind: "標高点", latitudeDeg: 35.972453, longitudeDeg: 138.358797, distanceM: 10507, azimuthDeg: 284.822, apparentAngleDeg: 7.8287, demElevationM: 2791.6, demAngleDeg: 7.7572, maxAngleInFrontDeg: 9.0312, visibility: "hidden" },
   { name: "赤岳", reading: "あかだけ", surveyElevationM: 2899, surveyKind: "三角点", latitudeDeg: 35.970797, longitudeDeg: 138.370067, distanceM: 9479, azimuthDeg: 285.308, apparentAngleDeg: 9.2275, demElevationM: 2883.1, demAngleDeg: 9.1337, maxAngleInFrontDeg: 8.1705, visibility: "visible" },
   { name: "横岳", reading: "よこだけ", surveyElevationM: 2830, surveyKind: "測定点", latitudeDeg: 35.985965, longitudeDeg: 138.372841, distanceM: 9829, azimuthDeg: 295.225, apparentAngleDeg: 8.509, demElevationM: 2806.3, demAngleDeg: 8.3741, maxAngleInFrontDeg: 8.1717, visibility: "visible" },
   { name: "峰の松目", reading: "みねのまつめ", surveyElevationM: 2568, surveyKind: "三角点", latitudeDeg: 35.99686, longitudeDeg: 138.350526, distanceM: 12164, azimuthDeg: 296.37, apparentAngleDeg: 5.6577, demElevationM: 2557.5, demAngleDeg: 5.6085, maxAngleInFrontDeg: 8.1611, visibility: "hidden" },
   { name: "硫黄岳", reading: "いおうだけ", surveyElevationM: 2760, surveyKind: "標高点", latitudeDeg: 35.998776, longitudeDeg: 138.369968, distanceM: 10734, azimuthDeg: 301.533, apparentAngleDeg: 7.4273, demElevationM: 2751.2, demAngleDeg: 7.381, maxAngleInFrontDeg: 7.2342, visibility: "visible" },
+  { name: "霧ヶ峰＜車山＞", reading: "きりがみね＜くるまやま＞", surveyElevationM: 1925, surveyKind: "三角点", latitudeDeg: 36.102894, longitudeDeg: 138.196669, distanceM: 30116, azimuthDeg: 304.878, apparentAngleDeg: 0.9706, demElevationM: 1918.3, demAngleDeg: null, maxAngleInFrontDeg: null, visibility: "unknown" },
   { name: "天狗岳", reading: "てんぐだけ", surveyElevationM: 2646, surveyKind: "三角点", latitudeDeg: 36.019171, longitudeDeg: 138.355453, distanceM: 13091, azimuthDeg: 307.024, apparentAngleDeg: 5.5906, demElevationM: 2634.6, demAngleDeg: 5.5413, maxAngleInFrontDeg: 5.8994, visibility: "hidden" },
   { name: "蓼科山", reading: "たてしなやま", surveyElevationM: 2531, surveyKind: "三角点", latitudeDeg: 36.103729, longitudeDeg: 138.295071, distanceM: 23469, azimuthDeg: 317.466, apparentAngleDeg: 2.7823, demElevationM: 2526.5, demAngleDeg: 2.7714, maxAngleInFrontDeg: 4.0608, visibility: "hidden" },
   { name: "縞枯山", reading: "しまがれやま", surveyElevationM: 2403, surveyKind: "標高点", latitudeDeg: 36.075319, longitudeDeg: 138.331549, distanceM: 18927, azimuthDeg: 318.291, apparentAngleDeg: 3.102, demElevationM: 2398.8, demAngleDeg: 3.0893, maxAngleInFrontDeg: 4.0389, visibility: "hidden" },

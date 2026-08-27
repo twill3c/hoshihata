@@ -6,7 +6,7 @@
 // データどうしは id で結び、穴をテストで塞ぐ(sugi-nami の soba.test.ts と同型)。
 
 import { describe, expect, it } from "vitest";
-import { LETTUCE_CULTIVARS } from "@/data/crops";
+import { CULTIVARS } from "@/data/crops";
 import { MENU_ITEMS } from "@/data/menu";
 import { SHOP_CATEGORIES, SHOP_ITEMS, SEASONAL_ITEMS, YEAR_ROUND_ITEMS } from "@/data/shop";
 import { dayOfYearOf, DAYS_IN_YEAR, produceOn } from "@/lib/harvest";
@@ -32,7 +32,7 @@ describe("T-30 直売所のデータの整合", () => {
 
   it("季節の品の作型 id が、すべて実在の作型を指す", () => {
     // 二重定義の照合。文字列で書き写した id は必ずいつか腐る
-    const cultivarIds = new Set(LETTUCE_CULTIVARS.map((c) => c.id));
+    const cultivarIds = new Set(CULTIVARS.map((c) => c.id));
     expect(SEASONAL_ITEMS.length).toBeGreaterThan(0);
     for (const item of SEASONAL_ITEMS) {
       expect(`${item.id} → ${item.cultivarId}: ${cultivarIds.has(item.cultivarId!)}`).toBe(
@@ -44,7 +44,7 @@ describe("T-30 直売所のデータの整合", () => {
   it("すべての作型が、直売所のどれかの品に割り当たっている", () => {
     // 逆向きの穴。作型を足したのに棚に出ない、が起きないように縛る
     const covered = new Set(SEASONAL_ITEMS.map((i) => i.cultivarId));
-    for (const cultivar of LETTUCE_CULTIVARS) {
+    for (const cultivar of CULTIVARS) {
       expect(`${cultivar.id}: ${covered.has(cultivar.id)}`).toBe(`${cultivar.id}: true`);
     }
   });

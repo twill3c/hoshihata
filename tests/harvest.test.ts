@@ -280,6 +280,40 @@ describe("T-10 決定論", () => {
   });
 });
 
+describe("T-53 デグレード防止 — レタスの数値を固定する", () => {
+  it("作型の一般化でレタスの収穫期が動かない", () => {
+    // 作型ごとに温度閾値を持てるよう crops.ts を一般化した(loop_006)。
+    // その拡張でレタスの結果が動いていないことを、実測値で固定して縛る。
+    //
+    // 出所: 実測 2026-08-27(loop_001 の SPEC §5.4 の表)
+    const expected: Record<string, [string, string]> = {
+      "heading-early": ["6/20", "9/29"],
+      "heading-mid": ["6/30", "10/9"],
+      "heading-late": ["7/10", "10/12"],
+      leaf: ["6/11", "9/14"],
+    };
+
+    for (const cultivar of LETTUCE_CULTIVARS) {
+      const window = PLANTING_WINDOWS[cultivar.heading ? "headingLettuceCold" : "leafLettuceCold"];
+      const days: number[] = [];
+      for (let doy = window.fromDoy; doy <= window.toDoy; doy++) {
+        const harvest = harvestDayOf(doy, cultivar.daysToHarvest);
+        if (harvest !== null) days.push(harvest);
+      }
+      expect(days.length).toBeGreaterThan(0);
+      const first = monthDayOf(Math.min(...days));
+      const last = monthDayOf(Math.max(...days));
+      const got: [string, string] = [
+        `${first.month}/${first.day}`,
+        `${last.month}/${last.day}`,
+      ];
+      expect(`${cultivar.id}: ${got.join("〜")}`).toBe(
+        `${cultivar.id}: ${expected[cultivar.id]!.join("〜")}`,
+      );
+    }
+  });
+});
+
 describe("通日と月日の相互変換", () => {
   it("往復して元に戻る", () => {
     for (let doy = 1; doy <= 366; doy++) {

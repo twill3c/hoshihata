@@ -10,7 +10,7 @@
 export type ShopCategory = "vegetable" | "dairy" | "meat" | "bakery" | "gear";
 
 export const SHOP_CATEGORIES: readonly { id: ShopCategory; name: string; summary: string }[] = [
-  { id: "vegetable", name: "高原野菜", summary: "並ぶ日が気象平年値から決まる。冬は棚が空く" },
+  { id: "vegetable", name: "高原野菜", summary: "レタスとキャベツ。並ぶ日が気象平年値から決まり、冬は棚が空く" },
   { id: "dairy", name: "乳製品", summary: "牛乳・ヨーグルト・チーズ" },
   { id: "meat", name: "ハム・ソーセージ", summary: "自家製の加工品" },
   { id: "bakery", name: "手作りパン", summary: "その日に焼く" },
@@ -58,6 +58,20 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     category: "vegetable",
     summary: "結球しないぶん早く穫れる。六月の中旬から",
     cultivarId: "leaf",
+  },
+  {
+    id: "cabbage-spring",
+    name: "春まきのキャベツ",
+    category: "vegetable",
+    summary: "四月下旬に植えて七月に穫る。レタスより日数が要る",
+    cultivarId: "cabbage-spring",
+  },
+  {
+    id: "cabbage-summer",
+    name: "夏まきのキャベツ",
+    category: "vegetable",
+    summary: "秋の玉。レタスが終わったあとも棚に残る",
+    cultivarId: "cabbage-summer",
   },
 
   // 通年の品

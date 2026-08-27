@@ -45,6 +45,18 @@ export const MENU_ITEMS: readonly MenuItem[] = [
     ingredientIds: ["lettuce-heading-late", "aged-cheese"],
   },
   {
+    id: "salad-cabbage-sausage",
+    name: "春キャベツとソーセージ",
+    summary: "巻きのゆるい玉を大きく切って、焼いたソーセージと",
+    ingredientIds: ["cabbage-spring", "sausage", "rye-bread"],
+  },
+  {
+    id: "salad-autumn-cabbage",
+    name: "秋キャベツとロースハム",
+    summary: "締まった玉は細く刻む。レタスが終わってからの主役",
+    ingredientIds: ["cabbage-summer", "roast-ham", "fresh-cheese"],
+  },
+  {
     id: "plate-ham-bread",
     name: "ハムとパンの皿",
     summary: "野菜の無い季節はこれになる",

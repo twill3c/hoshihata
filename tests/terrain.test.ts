@@ -42,11 +42,18 @@ describe("T-13b ゲートの空振り防止", () => {
 });
 
 describe("T-20 標高の照合(DEM と測量成果)", () => {
+  // DEM の被覆内にある峰だけが照合の対象。被覆外(守屋山など)は demElevationM が null
+  const inCoverage = PEAKS.filter((p) => p.demElevationM !== null);
+
+  it("走査対象が空でなく、被覆外の峰も存在する", () => {
+    expect(inCoverage.length).toBeGreaterThan(5);
+    expect(PEAKS.length).toBeGreaterThan(inCoverage.length);
+  });
+
   it("DEM の山頂標高は測量成果を上回らない", () => {
     // 出所: 不変量。30.9 m メッシュは鋭い山頂を均すので、必ず低めに出る。
     // 上回ったら座標変換かタイルの並べ方を疑う
-    for (const peak of PEAKS) {
-      expect(peak.demElevationM).not.toBeNull();
+    for (const peak of inCoverage) {
       expect(`${peak.name}: ${peak.demElevationM! - peak.surveyElevationM <= 0}`).toBe(
         `${peak.name}: true`,
       );
@@ -54,9 +61,9 @@ describe("T-20 標高の照合(DEM と測量成果)", () => {
   });
 
   it("DEM の山頂標高の不足は 50 m 以内", () => {
-    // 出所: 実測(2026-08-27)。13 座で -4.2 〜 -37.4 m、中央 -11.4 m。
+    // 出所: 実測(2026-08-27)。被覆内の峰で -4.2 〜 -37.4 m、中央 -11.4 m。
     // 定数でなく観測値。データが変わったら測り直して書き換える
-    for (const peak of PEAKS) {
+    for (const peak of inCoverage) {
       const shortfall = peak.surveyElevationM - peak.demElevationM!;
       expect(`${peak.name}: ${shortfall < 50}`).toBe(`${peak.name}: true`);
     }
@@ -92,7 +99,49 @@ describe("T-21 稜線の形", () => {
     for (const point of SKYLINE) {
       expect(`${point.azimuthDeg}: ${point.coveredM >= 25000}`).toBe(`${point.azimuthDeg}: true`);
     }
-    expect(PEAKS.filter((p) => p.visibility === "unknown")).toHaveLength(0);
+  });
+});
+
+describe("T-29 判定できないことを出力に残す", () => {
+  // **この分岐は loop_005 まで一度も通らなかった。** 峰の採録半径を射線の届く距離と
+  // 同じにしていたため、被覆外の峰は一覧から黙って消えていた。
+  // 「見えない」のか「調べていない」のかが読者に伝わらない。
+  // 採録半径を 40 km に広げ、判定できないものは unknown として正直に出す(loop_006)。
+  const unknown = PEAKS.filter((p) => p.visibility === "unknown");
+
+  it("判定不能の峰が実際に存在する(分岐が生きている)", () => {
+    expect(unknown.length).toBeGreaterThan(0);
+  });
+
+  it("判定不能なのは、射線を追える距離より遠いか、DEM の被覆外の峰だけ", () => {
+    for (const peak of unknown) {
+      const tooFar = peak.distanceM > PANORAMA.rayMaxM;
+      const outside = peak.demElevationM === null;
+      expect(`${peak.name}: ${tooFar || outside}`).toBe(`${peak.name}: true`);
+    }
+  });
+
+  it("逆に、射線が届く範囲の峰はすべて判定されている", () => {
+    // 「判定不能」を逃げ道に使っていないこと
+    const reachable = PEAKS.filter(
+      (p) => p.distanceM <= PANORAMA.rayMaxM && p.demElevationM !== null,
+    );
+    expect(reachable.length).toBeGreaterThan(0);
+    for (const peak of reachable) {
+      expect(`${peak.name}: ${peak.visibility}`).not.toBe(`${peak.name}: unknown`);
+    }
+  });
+
+  it("判定不能の峰は仰角や遮蔽の値を持たない", () => {
+    // 判定していないのに数値だけ出ていたら、読者は判定したと思う
+    for (const peak of unknown) {
+      expect(`${peak.name}: ${peak.maxAngleInFrontDeg}`).toBe(`${peak.name}: null`);
+      expect(`${peak.name}: ${peak.demAngleDeg}`).toBe(`${peak.name}: null`);
+    }
+  });
+
+  it("採録半径が射線の届く距離より広い(この設計の要)", () => {
+    expect(PANORAMA.peakRadiusM).toBeGreaterThan(PANORAMA.rayMaxM);
   });
 });
 
@@ -158,9 +207,9 @@ describe("T-23 オラクル — 隠れる峰は稜線より低い", () => {
     // 遮蔽側を DEM、峰側を測量成果から取ると、両者の系統差が判定の余裕に化ける。
     // loop_002 で実際に起き、赤岳が 0.09° 差で辛うじて残っていた
     for (const peak of PEAKS) {
-      if (peak.demElevationM === null) continue;
+      if (peak.demElevationM === null || peak.demAngleDeg === null) continue;
       // DEM 由来の仰角は、測量成果由来の仰角より必ず低い(T-20 と同じ符号)
-      expect(`${peak.name}: ${peak.demAngleDeg! <= peak.apparentAngleDeg}`).toBe(
+      expect(`${peak.name}: ${peak.demAngleDeg <= peak.apparentAngleDeg}`).toBe(
         `${peak.name}: true`,
       );
     }

@@ -166,10 +166,18 @@ if (panorama) {
 // ---- F-04 品が全件出荷されているか(絞り込みで消えていないこと)
 const shop = pages.find((p) => p.path === "shop/index.html");
 if (shop) {
+  // data-item は品カード、data-band は旬の帯。同じ名前を使うと数が混ざる
   const cards = [...shop.html.matchAll(/data-item="([^"]+)"/g)].map((m) => m[1]);
-  const bands = [...shop.html.matchAll(/class="calendar__span"/g)].length;
+  const bandRows = [...shop.html.matchAll(/data-band="([^"]+)"/g)].map((m) => m[1]);
+  const spans = [...shop.html.matchAll(/class="calendar__span"/g)].length;
   if (cards.length === 0) fail("shop/index.html", "品が一つも出荷されていない");
-  if (bands === 0) fail("shop/index.html", "旬の帯が一本も出荷されていない");
+  if (bandRows.length === 0) fail("shop/index.html", "旬の帯が一本も出荷されていない");
+  if (spans === 0) fail("shop/index.html", "旬の帯に区間が一つも描かれていない");
+  if (new Set(cards).size !== cards.length) fail("shop/index.html", "品の id が重複している");
+  // 帯のある品は、必ずカードにもある
+  for (const id of bandRows) {
+    if (!cards.includes(id)) fail("shop/index.html", `旬の帯にあるのにカードが無い: ${id}`);
+  }
 }
 
 // ---- F-07 場内図。区画の集合が図とデータで一致するか(二重定義の照合)

@@ -9,7 +9,7 @@
 // 実時刻・乱数に依存しない純関数だけで組む(SPEC §6・T-10)。
 
 import { DAILY_NORMALS, type DailyNormal } from "../data/normals.generated.ts";
-import { LETTUCE_CULTIVARS, type LettuceCultivar, plantingWindowFor } from "../data/crops.ts";
+import { CULTIVARS, type Cultivar, plantingWindowFor } from "../data/crops.ts";
 
 /** 平年値の暦。気象庁は閏日の平年値も公表しているので通年 366 日。 */
 export const DAYS_IN_YEAR = 366;
@@ -35,15 +35,26 @@ export const GROWTH_STOP_HIGH_C = 30;
 
 /**
  * 日平均気温がその日を生育可能日にするか。
- * 原典が「10 ℃以下」「30 ℃以上」と書くので、境界は開区間である(T-08)。
+ * 境界は開区間である — 原典が「◯℃以下」「◯℃以上」と書くため(T-08)。
+ *
+ * **閾値は作物ごとに違う。** 既定値はレタスのものだが、
+ * 作型を渡せばその作型の閾値で判定する。
  */
-export function isGrowingDay(tempMeanC: number): boolean {
-  return tempMeanC > GROWTH_IMPEDED_LOW_C && tempMeanC < GROWTH_STOP_HIGH_C;
+export function isGrowingDay(
+  tempMeanC: number,
+  lowC: number = GROWTH_IMPEDED_LOW_C,
+  highC: number = GROWTH_STOP_HIGH_C,
+): boolean {
+  return tempMeanC > lowC && tempMeanC < highC;
 }
 
 /** 株が生き延びられるか(生育はしないが枯れない範囲)。作期の外側を語るために持つ。 */
-export function isSurvivableDay(tempMeanC: number): boolean {
-  return tempMeanC > GROWTH_STOP_LOW_C && tempMeanC < GROWTH_STOP_HIGH_C;
+export function isSurvivableDay(
+  tempMeanC: number,
+  lowC: number = GROWTH_STOP_LOW_C,
+  highC: number = GROWTH_STOP_HIGH_C,
+): boolean {
+  return tempMeanC > lowC && tempMeanC < highC;
 }
 
 /** 月日 → 通日(1-366)。 */
@@ -106,19 +117,24 @@ export function normalOf(doy: number): DailyNormal {
 const HARVEST_INDEX = new Map<string, Map<number, number>>();
 
 /** 収穫日 → その日に収穫を迎える最も早い定植日。 */
-function harvestIndexFor(cultivar: LettuceCultivar): Map<number, number> {
+function harvestIndexFor(cultivar: Cultivar): Map<number, number> {
   const cached = HARVEST_INDEX.get(cultivar.id);
   if (cached) return cached;
 
   const window = plantingWindowFor(cultivar);
   const byHarvest = new Map<number, number>();
   for (let planted = window.fromDoy; planted <= window.toDoy; planted++) {
-    const harvest = harvestDayOf(planted, cultivar.daysToHarvest);
+    const harvest = harvestDayOfCultivar(planted, cultivar);
     // 定植日は昇順に見るので、最初に入ったものが最も早い定植日になる
     if (harvest !== null && !byHarvest.has(harvest)) byHarvest.set(harvest, planted);
   }
   HARVEST_INDEX.set(cultivar.id, byHarvest);
   return byHarvest;
+}
+
+/** その作型の閾値で収穫日を求める。 */
+export function harvestDayOfCultivar(plantingDoy: number, cultivar: Cultivar): number | null {
+  return harvestDayOf(plantingDoy, cultivar.daysToHarvest, cultivar.growthLowC, cultivar.growthHighC);
 }
 
 /**
@@ -128,7 +144,12 @@ function harvestIndexFor(cultivar: LettuceCultivar): Map<number, number> {
  * ほぼ無いため、打ち切りは「その年の作期が終わった」ことと実質的に同じである。
  * 積み上がらなければ null — その定植日にその作型は成立しない(T-07)。
  */
-export function harvestDayOf(plantingDoy: number, daysToHarvest: number): number | null {
+export function harvestDayOf(
+  plantingDoy: number,
+  daysToHarvest: number,
+  lowC: number = GROWTH_IMPEDED_LOW_C,
+  highC: number = GROWTH_STOP_HIGH_C,
+): number | null {
   if (!Number.isInteger(plantingDoy) || plantingDoy < 1 || plantingDoy > DAYS_IN_YEAR) {
     throw new RangeError(`定植日が範囲外: ${plantingDoy}`);
   }
@@ -137,7 +158,7 @@ export function harvestDayOf(plantingDoy: number, daysToHarvest: number): number
   }
   let grown = 0;
   for (let doy = plantingDoy + 1; doy <= DAYS_IN_YEAR; doy++) {
-    if (isGrowingDay(normalOf(doy).tempMeanC)) {
+    if (isGrowingDay(normalOf(doy).tempMeanC, lowC, highC)) {
       grown++;
       if (grown === daysToHarvest) return doy;
     }
@@ -148,6 +169,7 @@ export function harvestDayOf(plantingDoy: number, daysToHarvest: number): number
 export type ProduceItem = {
   cultivarId: string;
   name: string;
+  crop: string;
   heading: boolean;
   /** この収穫日に至る定植日(通日)。複数ありうるので最も早いものを代表に採る */
   plantedOnDoy: number;
@@ -164,12 +186,13 @@ export function produceOn(doy: number): ProduceItem[] {
     throw new RangeError(`通日が範囲外: ${doy}`);
   }
   const items: ProduceItem[] = [];
-  for (const cultivar of LETTUCE_CULTIVARS) {
+  for (const cultivar of CULTIVARS) {
     const planted = harvestIndexFor(cultivar).get(doy);
     if (planted !== undefined) {
       items.push({
         cultivarId: cultivar.id,
         name: cultivar.name,
+        crop: cultivar.crop,
         heading: cultivar.heading,
         plantedOnDoy: planted,
       });

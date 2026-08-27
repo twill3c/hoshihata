@@ -42,6 +42,18 @@ const AZIMUTH_STEP_DEG = 0.05;
 const RAY_STEP_M = 15;
 const RAY_MAX_M = 26000;
 
+/**
+ * 峰を採録する半径(m)。**射線を追える距離より広く採る。**
+ *
+ * 狭く採ると、DEM の被覆外にある峰は一覧から黙って消える。
+ * 「見えない」のか「調べていない」のかが読者に伝わらない。
+ * 広く採って、射線が被覆外へ出たものは `unknown`(判定不能)として正直に出す。
+ *
+ * 26 km より遠い峰(南アルプスなど)は必ず判定不能になる。それでよい —
+ * **判定できないことを出力に残すのが目的**である。
+ */
+const PEAK_RADIUS_M = 40000;
+
 const EARTH_RADIUS_M = 6371008.8;
 /**
  * 大気差の係数。標準的な k = 0.13 を採る。
@@ -259,7 +271,10 @@ const SUMMIT_BUFFER_M = 150;
  * 測量成果は同定と標高照合にだけ使う(SPEC N-02)。
  */
 function occlusionOf(peak) {
+  // 峰そのものが DEM の被覆外なら、何も言えない
   if (peak.demElevationM === null) return { status: "unknown", maxAngleInFront: null, demAngleDeg: null };
+  // 射線を追える距離より遠い峰も、手前の地形を最後まで見られないので判定しない
+  if (peak.distanceM > RAY_MAX_M) return { status: "unknown", maxAngleInFront: null, demAngleDeg: null };
   const demAngleDeg = apparentElevationDeg(eyeElevationM, peak.demElevationM, peak.distanceM);
 
   const limit = peak.distanceM - SUMMIT_BUFFER_M;
@@ -284,7 +299,7 @@ for (const f of geo.features) {
   const p = f.properties;
   const point = { latitudeDeg: p["緯度"], longitudeDeg: p["経度"] };
   const d = distanceM(VIEWPOINT, point);
-  if (d > RAY_MAX_M) continue;
+  if (d > PEAK_RADIUS_M) continue;
   const az = azimuthDeg(VIEWPOINT, point);
   if (az < AZIMUTH_FROM_DEG || az > AZIMUTH_TO_DEG) continue;
 
@@ -405,6 +420,7 @@ export const PANORAMA = {
   azimuthStepDeg: ${AZIMUTH_STEP_DEG},
   rayStepM: ${RAY_STEP_M},
   rayMaxM: ${RAY_MAX_M},
+  peakRadiusM: ${PEAK_RADIUS_M},
   summitBufferM: ${SUMMIT_BUFFER_M},
   refractionK: ${REFRACTION_K},
   earthRadiusM: ${EARTH_RADIUS_M},

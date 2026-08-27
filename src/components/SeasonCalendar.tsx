@@ -33,7 +33,7 @@ export function SeasonCalendar() {
               className="calendar__track"
               role="img"
               aria-label={`${item.name}が棚に並ぶ期間`}
-              data-item={item.id}
+              data-band={item.id}
               data-spans={spans.length}
             >
               {spans.map((span) => (
