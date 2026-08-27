@@ -118,6 +118,7 @@ npm run typecheck
 npm run build            # 静的書き出し（out/）
 npm run verify           # 出荷 HTML を読む検査
 npm run verify:ui        # 実ブラウザでボタンを押す検査
+npm run verify:live      # 本番に対する検品（ヘッダ・リダイレクトまで見る）
 
 npm run dev              # 開発サーバ
 npm run shot:site        # 出荷サイトを実ブラウザで撮る（--dark で暗色）
@@ -137,15 +138,20 @@ L1 完了（旬カレンダーのモデルと架空明示ゲート）。
 L2 完了（八ヶ岳の稜線同定図）。
 L3 完了（Next.js の骨格・直売所・食堂・明暗テーマ・出荷 HTML を読む検査）。
 L4 完了（RV パーク・道のり・お知らせ）。
-L5 ほぼ完了（OG 画像・JSON-LD・sitemap・フリート共通フッタ・GitHub 公開）。
-**残るは Vercel へのデプロイと app-menu への掲載のみ**（日次上限のため 24 時間待ち）。
+L5 完了（OG 画像・JSON-LD・sitemap・フリート共通フッタ）。
+L6・L7 完了（宿題の解消・キャベツとホウレンソウ）。
+L8 完了（**公開**・本番に対する検品・app-menu 掲載）。
 
 ## 公開
 
+- **本番: <https://hoshihata.vercel.app>**
 - ソース: <https://github.com/twill3c/hoshihata>
-- 本番: `https://hoshihata.vercel.app`（**未公開** — Vercel の日次デプロイ上限に当たったため。
-  24 時間おいて `npx vercel deploy --prod --yes --scope twill3c-8670s-projects --archive=tgz`）
 - 歩き方 / 設計図: フッタから開けます
+
+**本番に対する検品を別に持っています**（`npm run verify:live`）。
+ローカルの出荷物検査は配信の前までしか見られません。実際、公開してすぐ
+OG 画像が `application/octet-stream` で配信されていることが分かりました
+（`output: "export"` は OG 画像を拡張子の無いファイルとして書き出すため）。
 
 ## ライセンス
 

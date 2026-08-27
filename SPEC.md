@@ -59,6 +59,7 @@
 | N-03 | 写真素材を一切持たない。ビジュアルは SVG のみ | T-25 / 出荷 HTML に `<img>` と外部参照が無いこと |
 | N-04 | 外部 API に実行時依存しない（気象・地図とも静的データで完結） | 依存関係とネットワーク呼び出しの不在を検査 |
 | N-05 | 出荷 HTML を読む検査（ソースでなくビルド生成物） | `scripts/verify-output.mjs`（**L3 完了**） |
+| N-06 | **本番に対する検品。** 配信時のヘッダ・リダイレクトは、デプロイして実際に取得するまで存在しない | `harness/verify-live.mjs`（**L8 完了**） |
 
 ## 5. 旬カレンダーのモデル（F-02）
 
@@ -489,20 +490,38 @@ N-03 / N-04 が禁じたいのは**外部から取得される資産**（画像�
   ・ 星畑の歩き方 ・ 星畑の設計図 ・ App Menu
 ```
 
-### 9.5 公開の手順
+### 9.5 公開（完了）
 
-1. GitHub リポジトリを作って push（**完了** — `twill3c/hoshihata`）
-2. Vercel へデプロイ（**未了** — 下記）
-3. app-menu への掲載（**未了** — 本番が生きてから。生きていない URL のカードを出さない）
+1. GitHub — `twill3c/hoshihata`
+2. Vercel — <https://hoshihata.vercel.app>（2026-08-28）
+3. app-menu — 掲載済み（64 件目・ブランドサイトの節）
 
-**Vercel の日次デプロイ上限（`api-deployments-free-per-day`・100/日）に当たった。**
-上限はアカウント全体のもので、プロジェクト側では何もできない。24 時間おいて再実行する:
+L5 では日次デプロイ上限（`api-deployments-free-per-day`・100/日・アカウント全体）に当たり、
+日をまたいで L8 で完了した。**外部資源の制約に依存する工程は、ループの完了条件から外す**
+（HC-048）。
 
-```
-npx vercel deploy --prod --yes --scope twill3c-8670s-projects --archive=tgz
-```
+### 9.6 本番に対する検品（N-06）
 
-`hoshihata.vercel.app` が 404 であること（名前が空いていること）は確認済み。
+**ローカルの出荷物検査は、配信の前までしか見られない。**
+
+公開してすぐ分かったのが、OG 画像が `Content-Type: application/octet-stream` で
+配信されていたことである。`output: "export"` は OG 画像を**拡張子の無いファイル**
+（`out/opengraph-image`）として書き出すので、静的配信側が MIME を推測できない。
+画像として認識されないので、SNS のカードに出ない。
+
+出荷 HTML 検査は PNG のシグネチャまで見ており、**正しく通っていた**。
+壊れていたのは「配信されるときに付くヘッダ」で、ビルド生成物のどこにも書かれていない。
+`vercel.json` で `Content-Type: image/png` を付けて解消した。
+
+`harness/verify-live.mjs`（`npm run verify:live`）が本番に対して見るもの:
+
+- 主要 10 経路が 200 で、架空明示が入っていて、`<img>` が無い
+- OG 画像 7 枚が **`image/png`** で返り、PNG のシグネチャを持つ
+- `sitemap.xml` / `robots.txt` の `Content-Type`
+- `meta` の `og:image` が指す URL が、実際に画像として取得できる
+- 実ブラウザで CSS が効き、絞り込みが動き、コンソールにエラーが出ない
+
+**判定に `vercel ls` や管理画面を使わない。** 本番 URL への実リクエストで確かめる。
 
 ## 10. 品質基準
 

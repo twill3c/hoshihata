@@ -17,7 +17,8 @@
     "start": "next start",
     "verify": "node scripts/verify-output.mjs",
     "shot:site": "node harness/shot-site.mjs",
-    "verify:ui": "node harness/verify-ui.mjs"
+    "verify:ui": "node harness/verify-ui.mjs",
+    "verify:live": "node harness/verify-live.mjs"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.14",
