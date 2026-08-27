@@ -7,6 +7,9 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
+    // src 内部の import は .ts 付きの相対パス。Node 24 の型剥がしで
+    // scripts から直接読めるようにするため(scripts/render-panorama.mjs)
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,

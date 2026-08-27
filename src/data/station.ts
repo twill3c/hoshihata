@@ -5,7 +5,7 @@
 // この施設は**架空**である。実在誤認を避けるため、番地・電話番号・地図のピン・
 // 道の駅の登録番号を持たない(F-03)。持たせようとすると tests/guard.test.ts が落ちる。
 
-import { NORMALS_STATION } from "@/data/normals.generated";
+import { NORMALS_STATION } from "./normals.generated.ts";
 
 export const STATION = {
   /** 施設名 */

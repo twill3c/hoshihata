@@ -8,8 +8,8 @@
 //
 // 実時刻・乱数に依存しない純関数だけで組む(SPEC §6・T-10)。
 
-import { DAILY_NORMALS, type DailyNormal } from "@/data/normals.generated";
-import { LETTUCE_CULTIVARS, type LettuceCultivar, plantingWindowFor } from "@/data/crops";
+import { DAILY_NORMALS, type DailyNormal } from "../data/normals.generated.ts";
+import { LETTUCE_CULTIVARS, type LettuceCultivar, plantingWindowFor } from "../data/crops.ts";
 
 /** 平年値の暦。気象庁は閏日の平年値も公表しているので通年 366 日。 */
 export const DAYS_IN_YEAR = 366;
