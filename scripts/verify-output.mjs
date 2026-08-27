@@ -172,6 +172,98 @@ if (newsIndex) {
   }
 }
 
+// ---- F-11 OG 画像。経路ごとに PNG が出荷されているか
+const OG_ROUTES = ["", "shop", "restaurant", "panorama", "rv", "access", "news"];
+for (const route of OG_ROUTES) {
+  const file = join(OUT, route, "opengraph-image");
+  if (!existsSync(file)) {
+    fail(`${route || "/"} の OG`, "opengraph-image が出荷されていない");
+    continue;
+  }
+  const bytes = readFileSync(file);
+  // PNG のシグネチャ。中身を見ずに「ファイルがある」だけで通さない
+  const isPng =
+    bytes.length > 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  if (!isPng) fail(`${route || "/"} の OG`, "PNG ではない");
+  if (bytes.length < 5000) fail(`${route || "/"} の OG`, `小さすぎる(${bytes.length} B)`);
+}
+
+// ---- F-11 JSON-LD。事業所の主張を出していないか
+const FORBIDDEN_LD_TYPES = [
+  "LocalBusiness",
+  "Place",
+  "Restaurant",
+  "FoodEstablishment",
+  "TouristAttraction",
+  "Campground",
+  "LodgingBusiness",
+  "Store",
+  "PostalAddress",
+  "GeoCoordinates",
+];
+const FORBIDDEN_LD_KEYS = ["streetAddress", "telephone", "geo", "latitude", "longitude", "openingHours"];
+let ldCount = 0;
+for (const page of pages) {
+  for (const block of page.html.matchAll(
+    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g,
+  )) {
+    ldCount++;
+    let parsed;
+    try {
+      parsed = JSON.parse(block[1]);
+    } catch {
+      fail(page.path, "JSON-LD が JSON として読めない");
+      continue;
+    }
+    const text = JSON.stringify(parsed);
+    for (const type of FORBIDDEN_LD_TYPES) {
+      if (new RegExp(`"@type"\\s*:\\s*"${type}"`).test(text)) {
+        fail(page.path, `JSON-LD が ${type} を主張している(架空の施設に事業所の構造化データを出さない)`);
+      }
+    }
+    for (const key of FORBIDDEN_LD_KEYS) {
+      if (new RegExp(`"${key}"\\s*:`).test(text)) {
+        fail(page.path, `JSON-LD に ${key} が入っている`);
+      }
+    }
+    if (typeof parsed.description === "string" && !parsed.description.includes("実在しません")) {
+      fail(page.path, "JSON-LD の説明文に架空である旨が無い(F-03)");
+    }
+  }
+}
+if (ldCount === 0) fail("JSON-LD", "JSON-LD が 1 件も出荷されていない(走査対象 0 件)");
+
+// ---- sitemap / robots
+for (const [name, checks] of [
+  ["sitemap.xml", [/<urlset/, /<loc>https:\/\//]],
+  ["robots.txt", [/User-Agent/i, /Sitemap:\s*https:\/\//i]],
+]) {
+  const path = join(OUT, name);
+  if (!existsSync(path)) {
+    fail(name, "出荷されていない");
+    continue;
+  }
+  const body = readFileSync(path, "utf-8");
+  for (const check of checks) {
+    if (!check.test(body)) fail(name, `期待する内容が無い: ${check}`);
+  }
+}
+{
+  const sitemapPath = join(OUT, "sitemap.xml");
+  if (existsSync(sitemapPath)) {
+    const xml = readFileSync(sitemapPath, "utf-8");
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    // 出荷した HTML の経路が、すべて sitemap に載っているか
+    for (const page of pages) {
+      if (page.path.startsWith("404")) continue;
+      const route = page.path === "index.html" ? "/" : `/${page.path.replace(/index\.html$/, "")}`;
+      if (!locs.some((loc) => loc.endsWith(route))) {
+        fail("sitemap.xml", `出荷した ${route} が sitemap に無い`);
+      }
+    }
+  }
+}
+
 // ---- 空の <title> を出荷しない
 //
 // SVG の <title> に複数の式を並べると、React の単一テキスト子要素制約で中身が丸ごと落ち、

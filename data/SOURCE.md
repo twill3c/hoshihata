@@ -73,6 +73,20 @@
 平年値から計算した年平均は **7.25 ℃** で、村公式の「8 度前後」と 0.75 ℃ ずれる。
 観測所と村域代表点の違いとみなし、**サイト上は「年平均 7 ℃台」までしか主張しない**（SPEC §2）。
 
+## フォント（OG 画像）
+
+| ファイル | 原典 | 取得日 |
+|---|---|---|
+| `font/subset-regular.woff`（31.8 KB）<br>`font/subset-bold.woff`（32.6 KB） | Google Fonts「Noto Sans JP」の部分集合<br>`https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@{400,700}&text=…` | 2026-08-27 |
+| `font/subset.json` | 上を取得したときに要求した字の台帳（107 字） | 2026-08-27 |
+
+**ビルド時にネットワークへ出ないよう vendor している。** 取得は `scripts/gen-og-font.mjs` で一度だけ。
+
+- **Satori（next/og）は woff2 を読めない。** Google Fonts は今どきの User-Agent に woff2 を返すので、
+  古い UA を送って woff を返させる（sugi-nami の recipe）
+- 字は `src/data/og-text.ts` から機械的に集める。**文言を変えたら回し直す。**
+  回し忘れると豆腐になるので、T-50 が「使う字が台帳にすべて入っていること」を確かめる
+
 ## 名称の実在確認
 
 | 確認 | 結果 | 確認日 |

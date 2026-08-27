@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { STATION } from "@/data/station";
+import { SITE } from "@/data/site";
+import { websiteJsonLd } from "@/lib/jsonld";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.origin),
   title: {
     default: `${STATION.name} — 八ヶ岳 野辺山高原`,
     template: `%s — ${STATION.name}`,
@@ -42,6 +45,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
 
         <main>{children}</main>
+
+        {/*
+          架空の施設に事業所の構造化データを出さない(F-03)。
+          LocalBusiness や Place は、番地を書かなくても型そのものが
+          「ここに店がある」と主張してしまう。出すのは WebSite だけ。
+        */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
+        />
 
         {/* fleet: fixed footer。架空である旨の明示はここが 1 箇所目(F-03) */}
         <footer className="site-footer">
