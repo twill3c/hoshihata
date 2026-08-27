@@ -540,11 +540,20 @@ th {
   align-items: center;
 }
 
-/* 項目のあいだに区切りを入れる(規約の並びが読み取れるように) */
-.site-footer__inner > a + a::before {
+/*
+  項目のあいだに区切りを入れる(規約の並びが読み取れるように)。
+  隣接(a + a)で書くと、あいだに著作権表示が入った途端に区切りが一つ消える。
+  「先頭以外のリンクの前」で書けば、何が挟まっても並びは崩れない。
+*/
+.site-footer__inner > a:not(:first-of-type)::before {
   content: "・";
   margin-right: 0.85rem;
   color: var(--line);
+}
+
+/* 著作権表示。MIT License の直後に地の文として続ける */
+.site-footer__copy {
+  margin-left: -0.6rem;
 }
 
 /*
