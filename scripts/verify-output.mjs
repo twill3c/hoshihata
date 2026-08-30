@@ -338,7 +338,7 @@ for (const page of pages) {
   const visible = page.html
     .replace(/<script[\s\S]*?<\/script>/g, "")
     .replace(/<style[\s\S]*?<\/style>/g, "")
-    .replace(/<[^>]+>/g, "");
+    .replace(/<[^>]+>/g, "\u0001");
   for (const key of INTERNAL_KEYS) {
     if (visible.includes(key)) {
       fail(page.path, `内部の識別子が本文に出ている: ${key}`);
