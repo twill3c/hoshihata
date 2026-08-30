@@ -360,7 +360,7 @@ for (const page of pages) {
 
 // ---- 文字種。キリル文字・ハングルの混入
 for (const page of pages) {
-  const foreign = /[Ѐ-ӿ가-힯ᄀ-ᇿ]/.exec(page.html);
+  const foreign = /[Ѐ-ӿ가-힯ᄀ-ᇿ]/.exec(page.html);  // text-hygiene:allow
   if (foreign) {
     const cp = foreign[0].codePointAt(0).toString(16);
     fail(page.path, `キリル文字・ハングルが混入している: U+${cp}`);
