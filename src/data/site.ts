@@ -13,7 +13,9 @@ export const SITE = {
  * 規約は koho-lens が正本。ラベルは和名+固有動詞を温存する。
  */
 export const FOOTER = {
-  license: "https://opensource.org/licenses/MIT",
+  // 規約では MIT License はこのリポジトリの LICENSE を指す(koho-lens が正本)。
+  // 一般論の opensource.org ではない。JSON-LD の license とは別物なので混ぜない。
+  license: `${SITE_REPOSITORY}/blob/main/LICENSE`,
   repository: SITE_REPOSITORY,
   guide: "https://claude.ai/code/artifact/603d766b-05bc-47ed-b706-eeb64346c142",
   blueprint: "https://claude.ai/code/artifact/38a59c53-4b96-4c8b-9e50-8100fcc3323c",
