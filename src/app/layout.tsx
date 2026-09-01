@@ -71,10 +71,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href={FOOTER.license}>MIT License</a>
             {/* 著作権表示はリンクの外に置く(規約: MIT License © 2026 坂田哲朗 ・ …) */}
             <span className="site-footer__copy">© 2026 坂田哲朗</span>
-            <a href={FOOTER.repository}>GitHub</a>
-            <a href={FOOTER.guide}>星畑の歩き方</a>
-            <a href={FOOTER.blueprint}>星畑の設計図</a>
-            <a href={FOOTER.appMenu}>App Menu</a>
+            <span className="fsep">・</span><a href={FOOTER.repository}>GitHub</a>
+            <span className="fsep">・</span><a href={FOOTER.guide}>星畑の歩き方</a>
+            <span className="fsep">・</span><a href={FOOTER.blueprint}>星畑の設計図</a>
+            <span className="fsep">・</span><a href={FOOTER.appMenu}>App Menu</a>
             <p className="site-footer__fiction">{STATION.fictionNotice}</p>
           </div>
         </footer>
