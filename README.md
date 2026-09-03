@@ -155,4 +155,8 @@ OG 画像が `application/octet-stream` で配信されていることが分か�
 
 ## ライセンス
 
-MIT License © 2026 坂田哲朗
+コードは MIT License © 2026 坂田哲朗([LICENSE](LICENSE))。
+
+`data/font/` に **Noto Sans JP の部分集合**(OG 画像用・107 字)を同梱している。
+こちらは **SIL Open Font License 1.1** で、全文は [data/font/OFL.txt](data/font/OFL.txt)、
+経緯は [NOTICE](NOTICE) を参照。
